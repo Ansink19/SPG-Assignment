@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 45f9ecad1bd894537a9e68b41b957b42, type: 3}
+  m_Name: ElementMap
+  m_EditorClassIdentifier: 
+  ElementWins:
+  - Element: 0
+    WinsAgainst: 0200000003000000
+  - Element: 1
+    WinsAgainst: 0000000004000000
+  - Element: 2
+    WinsAgainst: 0100000003000000
+  - Element: 3
+    WinsAgainst: 0100000004000000
+  - Element: 4
+    WinsAgainst: 0000000002000000
+  ElementIcons:
+  - Element: 0
+    Icon: {fileID: 21300000, guid: e54d944b88bd149e296ecab8da3dfe61, type: 3}
+  - Element: 1
+    Icon: {fileID: 21300000, guid: 18134b50fec2248dc8ea58d1b3ea8b5e, type: 3}
+  - Element: 2
+    Icon: {fileID: 21300000, guid: 44f2480685f274a1abb6b1d5b2633250, type: 3}
+  - Element: 3
+    Icon: {fileID: 21300000, guid: 296f11e8db18f40f3942a56354c25a20, type: 3}
+  - Element: 4
+    Icon: {fileID: 21300000, guid: 4daf7aa67d1154ff4b19ab0df0b8fdf7, type: 3}
