@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Xml.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -23,18 +24,16 @@ public class CanvasHandler : MonoBehaviour
     [Header("Game")]
     [SerializeField] private GameObject Timer;
     [SerializeField] private Image TimerFill;
-
-    [Space]
-    [SerializeField] private RevealToken AIRevealToken;
-    [SerializeField] private RevealToken PlayerRevealToken;
-
-    [Space]
     [SerializeField] private GameObject Tost;
     [SerializeField] private TextMeshProUGUI ToastText;
 
     [Space]
+    [SerializeField] private RevealToken AIRevealToken;
+    [SerializeField] private RevealToken PlayerRevealToken;
     [SerializeField] private TextMeshProUGUI AIScoreText;
     [SerializeField] private TextMeshProUGUI PlayerScoreText;
+    [SerializeField] private TextMeshProUGUI PlayerHandText;
+
 
     private World World;
 
@@ -42,6 +41,8 @@ public class CanvasHandler : MonoBehaviour
     {
         GameEventHandler.OnWorldInit += OnWorldInit;
         GameEventHandler.OnGameStateChange += OnGameStateChanged;
+        GameEventHandler.OnPlayerSelectElement += SetPlayerHand;
+
         LoadingCanvasPanel.SetActive(true);
         Tost.SetActive(false);
         Timer.SetActive(false);
@@ -56,6 +57,8 @@ public class CanvasHandler : MonoBehaviour
     private void OnPlayButtonClicked()
     {
         World.GameStart();
+        SetScore();
+        SetPlayerHand(World.PlayerElement);
     }
 
     void OnGameStateChanged(GameState gameState)
@@ -81,7 +84,7 @@ public class CanvasHandler : MonoBehaviour
         if(World.PlayerHighScore != 0)
         {
             HighScore.SetActive(true);
-            HighScoreText.text = $"{World.PlayerHighScore}";
+            HighScoreText.text = $"High Score : {World.PlayerHighScore}";
             return;
         }
         HighScore.SetActive(false);
@@ -96,11 +99,7 @@ public class CanvasHandler : MonoBehaviour
 
     private IEnumerator PlayHandRoutine()
     {
-        MenuCanvasPanel.SetActive(false);
-        GameCanvasPanel.SetActive(true);
-        AIRevealToken.ResetSprite();
-        PlayerRevealToken.ResetSprite();
-
+        ResetInGameUI();
         yield return ShowToast($"Round Start!");
 
         Timer.SetActive(true);
@@ -125,13 +124,26 @@ public class CanvasHandler : MonoBehaviour
         PlayerRevealToken.Init(World.PlayerElement, World.ElementMap.ElementIcons);
         yield return new WaitForSeconds(1f);
 
+        AIRevealToken.ResetToken();
+        PlayerRevealToken.ResetToken();
+
         var winner = World.RoundWinner;
         var toastText = winner == WinState.Draw ? "Draw" : $"{winner} Wins!!";
         yield return ShowToast(toastText);
 
+        SetScore();
+        World.UpdateGameState(GameState.PostGame);
+    }
+
+    public void SetScore()
+    {
         AIScoreText.text = $"{World.AIScore}";
         PlayerScoreText.text = $"{World.PlayerScore}";
-        World.UpdateGameState(GameState.PostGame);
+    }
+
+    public void SetPlayerHand(GameElements gameElement)
+    {
+        PlayerHandText.text = $"Your Hand : {gameElement}";
     }
 
     private IEnumerator ShowToast(string text, float time = 1)
@@ -140,6 +152,22 @@ public class CanvasHandler : MonoBehaviour
         ToastText.text = text;
         yield return new WaitForSeconds(time);
         Tost.SetActive(false);
+    }
+
+    private void ResetInGameUI()
+    {
+        MenuCanvasPanel.SetActive(false);
+        GameCanvasPanel.SetActive(true);
+        AIRevealToken.ResetToken();
+        PlayerRevealToken.ResetToken();
+        SetPlayerHand(World.PlayerElement);
+    }
+
+    void OnDestroy()
+    {
+        GameEventHandler.OnWorldInit -= OnWorldInit;
+        GameEventHandler.OnGameStateChange -= OnGameStateChanged;
+        GameEventHandler.OnPlayerSelectElement -= SetPlayerHand;
     }
 
 }

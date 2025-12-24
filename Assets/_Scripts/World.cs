@@ -55,8 +55,7 @@ public class World : MonoBehaviour
     {
         if (gameState == GameState.Menu)
         {
-            AIScore = 0;
-            PlayerScore = 0;
+            ResetGameState();
         }
         if (gameState == GameState.Play)
         {
@@ -134,5 +133,19 @@ public class World : MonoBehaviour
         }
 
         return WinState.AI;
+    }
+
+    private void ResetGameState()
+    {
+        RoundWinner = WinState.None;
+        PlayerElement = GameElements.None;
+        AIElement = GameElements.None;
+        AIScore = 0;
+        PlayerScore = 0;
+    }
+
+    void OnDestroy()
+    {
+        GameEventHandler.OnPlayerSelectElement -= OnPlayerSelectElement;
     }
 }
