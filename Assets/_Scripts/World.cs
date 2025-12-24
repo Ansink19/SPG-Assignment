@@ -28,7 +28,7 @@ public class World : MonoBehaviour
     [NonSerialized] public GameElements PlayerElement;
     [NonSerialized] public GameElements AIElement;
 
-    [NonSerialized] public string RoundWinner;
+    [NonSerialized] public WinState RoundWinner;
     [NonSerialized] public int AIScore;
     [NonSerialized] public int PlayerScore;
 
@@ -46,21 +46,21 @@ public class World : MonoBehaviour
     }
 
     private void Start()
-    {
-        //Read Saves
-        GameState = GameState.Menu;
+    {        
         GameEventHandler.OnWorldInit?.Invoke(this);
+        GameState = GameState.Menu;
     }
 
     public void UpdateGameState(GameState gameState)
     {
         if (gameState == GameState.Menu)
         {
-
+            AIScore = 0;
+            PlayerScore = 0;
         }
         if (gameState == GameState.Play)
         {
-            RoundWinner = string.Empty;
+            RoundWinner = WinState.None;
             PlayerElement = GameElements.None;
             AIElement = GameElements.None;
             AIElement = SelectAIElement();
@@ -68,23 +68,23 @@ public class World : MonoBehaviour
         if (gameState == GameState.Reveal)
         {
             RoundWinner = SelectGameWinner();
-            if (RoundWinner == "AI")
+            if (RoundWinner == WinState.AI)
             {
                 AIScore++;
             }
-            else
+            else if(RoundWinner == WinState.Player)
             {
                 PlayerScore++;
             }
 
             if (PlayerScore > PlayerHighScore)
             {
-                PlayerHighScore = PlayerHighScore;
+                PlayerHighScore = PlayerScore;
             }
         }
         if (gameState == GameState.PostGame)
         {
-            if (RoundWinner == "AI")
+            if (RoundWinner == WinState.AI)
             {
                 GameEnd();
             }
@@ -114,22 +114,35 @@ public class World : MonoBehaviour
         return (GameElements)values.GetValue(UnityEngine.Random.Range(0, values.Length - 1));
     }
 
-    private string SelectGameWinner()
+    private WinState SelectGameWinner()
     {
         if (PlayerElement == GameElements.None)
         {
-            return "AI";
+            return WinState.AI;
+        }
+
+        if (PlayerElement == AIElement)
+        {
+            return WinState.Draw;
         }
 
         ElementWinMap map = ElementMap.ElementWins.Find(x => x.Element == PlayerElement);
 
         if (map.WinsAgainst.Contains(AIElement))
         {
-            return "Player";
+            return WinState.Player;
         }
 
-        return "AI";
+        return WinState.AI;
     }
+}
+
+public enum WinState
+{
+    AI,
+    Player,
+    Draw,
+    None
 }
 
 public enum GameState

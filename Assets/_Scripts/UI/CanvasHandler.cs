@@ -8,43 +8,52 @@ using UnityEngine.UI;
 
 public class CanvasHandler : MonoBehaviour
 {
+    [Header("Panels")]
     [SerializeField] private GameObject LoadingCanvasPanel;
     [SerializeField] private GameObject MenuCanvasPanel;
     [SerializeField] private GameObject GameCanvasPanel;
 
+    [Space]
+    [Header("Menu")]
     [SerializeField] private Button PlayButton;
-
-    [SerializeField] private GameObject Timer;
-    [SerializeField] private Image TimerFill;
-
-    [SerializeField] private RevelToken AIRevealToken;
-    [SerializeField] private RevelToken PlayerRevealToken;
-
-    [SerializeField] private GameObject Tost;
-    [SerializeField] private TextMeshProUGUI ToastText;
-
     [SerializeField] private GameObject HighScore;
     [SerializeField] private TextMeshProUGUI HighScoreText;
 
+    [Space]
+    [Header("Game")]
+    [SerializeField] private GameObject Timer;
+    [SerializeField] private Image TimerFill;
+
+    [Space]
+    [SerializeField] private RevealToken AIRevealToken;
+    [SerializeField] private RevealToken PlayerRevealToken;
+
+    [Space]
+    [SerializeField] private GameObject Tost;
+    [SerializeField] private TextMeshProUGUI ToastText;
+
+    [Space]
     [SerializeField] private TextMeshProUGUI AIScoreText;
     [SerializeField] private TextMeshProUGUI PlayerScoreText;
 
     private World World;
 
-    void Awake()
+    private void Awake()
     {
         GameEventHandler.OnWorldInit += OnWorldInit;
         GameEventHandler.OnGameStateChange += OnGameStateChanged;
         LoadingCanvasPanel.SetActive(true);
+        Tost.SetActive(false);
+        Timer.SetActive(false);
     }
 
-    public void OnWorldInit(World world)
+    private void OnWorldInit(World world)
     {
         World = world;
         PlayButton.onClick.AddListener(OnPlayButtonClicked);
     }
 
-    public void OnPlayButtonClicked()
+    private void OnPlayButtonClicked()
     {
         World.GameStart();
     }
@@ -54,13 +63,11 @@ public class CanvasHandler : MonoBehaviour
         if (gameState == GameState.Menu)
         {
             TurnOffAllPanels();
-            MenuCanvasPanel.SetActive(true);
             SetHighScore();
+            MenuCanvasPanel.SetActive(true);
         }
         else if (gameState == GameState.Play)
         {
-            MenuCanvasPanel.SetActive(true);
-            GameCanvasPanel.SetActive(true);
             StartCoroutine(PlayHandRoutine());
         }
         else if(gameState == GameState.Reveal)
@@ -75,10 +82,12 @@ public class CanvasHandler : MonoBehaviour
         {
             HighScore.SetActive(true);
             HighScoreText.text = $"{World.PlayerHighScore}";
+            return;
         }
+        HighScore.SetActive(false);
     }
 
-    public void TurnOffAllPanels()
+    private void TurnOffAllPanels()
     {
         LoadingCanvasPanel.SetActive(false);
         MenuCanvasPanel.SetActive(false);
@@ -87,6 +96,11 @@ public class CanvasHandler : MonoBehaviour
 
     private IEnumerator PlayHandRoutine()
     {
+        MenuCanvasPanel.SetActive(false);
+        GameCanvasPanel.SetActive(true);
+        AIRevealToken.ResetSprite();
+        PlayerRevealToken.ResetSprite();
+
         yield return ShowToast($"Round Start!");
 
         Timer.SetActive(true);
@@ -97,12 +111,10 @@ public class CanvasHandler : MonoBehaviour
         while (timer < totalTime)
         {
             timer += Time.deltaTime;
-            TimerFill.fillAmount = timer / totalTime;
+            TimerFill.fillAmount = 1 - (timer / totalTime);
             yield return null;
         }
         TimerFill.fillAmount = 0;
-        yield return new WaitForSeconds(1f);
-
         World.UpdateGameState(GameState.Reveal);
     }
 
@@ -114,11 +126,11 @@ public class CanvasHandler : MonoBehaviour
         yield return new WaitForSeconds(1f);
 
         var winner = World.RoundWinner;
-        yield return ShowToast($"{winner} Wins!!");
+        var toastText = winner == WinState.Draw ? "Draw" : $"{winner} Wins!!";
+        yield return ShowToast(toastText);
 
         AIScoreText.text = $"{World.AIScore}";
         PlayerScoreText.text = $"{World.PlayerScore}";
-        yield return new WaitForSeconds(1f);
         World.UpdateGameState(GameState.PostGame);
     }
 

@@ -5,7 +5,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class RevelToken : MonoBehaviour
+public class RevealToken : MonoBehaviour
 {
     [SerializeField] private Image ElementIcon;
 
@@ -13,10 +13,14 @@ public class RevelToken : MonoBehaviour
     {
         if (element == GameElements.None)
         {
-            Debug.LogError("Invalid Element Passed");
-
+            return;
         }
         ElementIconMap map = elementIcons.Find(x => x.Element == element);
         ElementIcon.sprite = map.Icon;
+    }
+
+    public void ResetSprite()
+    {
+        ElementIcon.sprite = null;
     }
 }
