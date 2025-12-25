@@ -128,7 +128,7 @@ public class CanvasHandler : MonoBehaviour
         PlayerRevealToken.ResetToken();
 
         var winner = World.RoundWinner;
-        var toastText = winner == WinState.Draw ? "Draw" : $"{winner} Wins!!";
+        var toastText = winner == WinState.Draw ? "Draw" : winner == WinState.AI ? "You Lose!" : "You Win!";
         yield return ShowToast(toastText);
 
         SetScore();
